@@ -1,0 +1,17 @@
+{
+  "name": "Cachito de Cielo Admin",
+  "short_name": "CachitoAdmin",
+  "description": "Sistema de administración y finanzas para Cachito de Cielo.",
+  "start_url": "./admin.html",
+  "display": "standalone",
+  "background_color": "#FFF7E6",
+  "theme_color": "#B46A72",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3132/3132693.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
