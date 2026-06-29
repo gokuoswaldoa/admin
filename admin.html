@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin - Cachito de Cielo</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#B46A72">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3132/3132693.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --vanilla: #FFF7E6;
+            --blush: #F7C8D3;
+            --rosewood: #B46A72;
+            --sage: #A8B58A;
+            --misty: #A9B7C6;
+            --midnight: #2D3A47;
+            --bg-light: #f4f6f8;
+            --safe-bottom: env(safe-area-inset-bottom, 20px);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--midnight);
+            /* Espacio para el menú inferior */
+            padding-bottom: calc(70px + var(--safe-bottom)); 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* HEADER */
+        .app-header {
+            background: #fff;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-header h1 {
+            color: var(--rosewood);
+            font-size: 1.5rem;
+        }
+
+        .status-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #ccc;
+        }
+        .status-dot.online { background: #25D366; box-shadow: 0 0 8px #25D366; }
+
+        /* TABS VIEWS */
+        .tab-content {
+            display: none;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* DASHBOARD CARDS */
+        .dash-grid {
+            display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        .dash-card {
+            background: #fff; padding: 20px; border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border-left: 5px solid var(--misty);
+        }
+        .dash-card.green { border-left-color: var(--sage); }
+        .dash-card.red { border-left-color: var(--rosewood); }
+        .dash-card.blue { border-left-color: var(--midnight); }
+
+        .dash-title { font-size: 0.9rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .dash-value { font-size: 2.2rem; font-weight: 700; color: var(--midnight); }
+        .dash-value.profit-pos { color: var(--sage); }
+        .dash-value.profit-neg { color: var(--rosewood); }
+
+        /* FORMS */
+        .form-card {
+            background: #fff; padding: 20px; border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px;
+        }
+        .form-card h2 { font-size: 1.2rem; margin-bottom: 15px; border-bottom: 2px solid var(--vanilla); padding-bottom: 8px; }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: #555; font-weight: 500; }
+        input, select {
+            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;
+            font-family: 'Outfit', sans-serif; font-size: 1rem; background: #f9f9f9;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--rosewood); background: #fff; }
+
+        .btn-submit {
+            width: 100%; background: var(--midnight); color: #fff; border: none;
+            padding: 14px; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer;
+        }
+        .btn-submit.pink { background: var(--rosewood); }
+        .btn-submit.green { background: var(--sage); }
+
+        /* LISTS */
+        .list-card {
+            background: #fff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); overflow: hidden;
+        }
+        .list-item {
+            padding: 15px 20px; border-bottom: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .list-item:last-child { border-bottom: none; }
+        .item-info h4 { font-size: 1.1rem; margin-bottom: 2px; }
+        .item-info p { font-size: 0.85rem; color: #888; }
+        .item-amount { font-weight: 700; font-size: 1.1rem; }
+        .item-amount.red { color: var(--rosewood); }
+        .item-amount.green { color: var(--sage); }
+        
+        .btn-delete { background: none; border: none; color: #ff4d4f; font-size: 1.5rem; cursor: pointer; padding: 5px; margin-left: 10px; }
+        .btn-status { background: #eee; border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; margin-top:5px; cursor:pointer;}
+        .status-Entregado { background: #d4edda; color: #155724; }
+        .status-Pendiente { background: #fff3cd; color: #856404; }
+
+        /* ANALYTICS & COMMUNITY */
+        .chart-container { background: #fff; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .feedback-item { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid var(--rosewood); box-shadow: 0 4px 15px rgba(0,0,0,0.02);}
+        .feedback-stars { color: #FFD700; font-size: 1.2rem; }
+
+        /* BOTTOM NAV */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: #fff; box-shadow: 0 -2px 15px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-around;
+            padding-bottom: var(--safe-bottom);
+            z-index: 100;
+        }
+        .nav-btn {
+            flex: 1; padding: 15px 0; border: none; background: none;
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            color: #888; font-family: 'Outfit', sans-serif; font-size: 0.8rem; font-weight: 500; cursor: pointer;
+        }
+        .nav-btn.active { color: var(--rosewood); font-weight: 700; }
+        .nav-icon { font-size: 1.4rem; }
+
+        @media (min-width: 768px) {
+            .dash-grid { grid-template-columns: repeat(3, 1fr); }
+            body { padding-bottom: 20px; }
+            .bottom-nav { position: static; box-shadow: none; border-bottom: 1px solid #eee; margin-bottom: 20px; }
+            .nav-btn { flex-direction: row; justify-content: center; gap: 10px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <h1>Cachito Admin ☁️</h1>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:0.8rem; color:#888;" id="syncStatusText">Conectando...</span>
+            <div class="status-dot" id="syncStatusDot"></div>
+        </div>
+    </header>
+
+    <!-- TABLERO -->
+    <section id="tab-dashboard" class="tab-content active">
+        <div class="dash-grid">
+            <div class="dash-card blue">
+                <div class="dash-title">Utilidad Neta Libre</div>
+                <div class="dash-value" id="dashProfit">$0.00</div>
+            </div>
+            <div class="dash-card green">
+                <div class="dash-title">Total Ingresos (Ventas)</div>
+                <div class="dash-value" id="dashIncome">$0.00</div>
+            </div>
+            <div class="dash-card red">
+                <div class="dash-title">Total Egresos (Insumos)</div>
+                <div class="dash-value" id="dashExpenses">$0.00</div>
+            </div>
+        </div>
+        <p style="text-align:center; color:#888; font-size:0.9rem;">La Utilidad Neta es tu verdadera ganancia una vez pagados los insumos.</p>
+    </section>
+
+    <!-- EGRESOS (COMPRAS) -->
+    <section id="tab-expenses" class="tab-content">
+        <div class="form-card">
+            <h2>Registrar Compra / Gasto</h2>
+            <form id="expenseForm">
+                <div class="form-group">
+                    <label>Concepto (¿Qué compraste?)</label>
+                    <input type="text" id="expConcept" required placeholder="Ej. Queso crema y galletas">
+                </div>
+                <div class="form-group">
+                    <label>Lugar (Opcional)</label>
+                    <input type="text" id="expPlace" placeholder="Ej. Sam's Club">
+                </div>
+                <div class="form-group">
+                    <label>Costo Total ($)</label>
+                    <input type="number" id="expAmount" required min="0" step="any" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" id="expDate" required>
+                </div>
+                <button type="submit" class="btn-submit pink">+ Guardar Gasto</button>
+            </form>
+        </div>
+
+        <h3 style="margin-bottom:10px; color:var(--midnight); font-size:1.1rem; padding-left:5px;">Historial de Gastos</h3>
+        <div class="list-card">
+            <div id="expensesList">
+                <p style="padding:20px; text-align:center; color:#888;">Cargando...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- INGRESOS (PEDIDOS) -->
+    <section id="tab-orders" class="tab-content">
+        <div class="form-card">
+            <h2>Nuevo Pedido</h2>
+            <form id="orderForm">
+                <div class="form-group">
+                    <label>Nombre del Cliente</label>
+                    <input type="text" id="ordClient" required placeholder="Ej. Ana Pérez">
+                </div>
+                
+                <div class="form-group">
+                    <label>Armar Pedido</label>
+                    <div id="orderItemsList" style="margin-bottom: 10px; font-size: 0.9rem; color: #555;"></div>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <select id="productSelect" style="flex: 2;">
+                            <option value="">-- Postre --</option>
+                            <optgroup label="Carlotas en Vaso">
+                                <option value="Cielo de Mazapán" data-price="40">Cielo de Mazapán (Mazapán) - $40</option>
+                                <option value="Brisa de Limón" data-price="30">Brisa de Limón (Limón) - $30</option>
+                                <option value="Atardecer de Fresa" data-price="35">Atardecer de Fresa (Fresa) - $35</option>
+                                <option value="Rayo de Mango" data-price="35">Rayo de Mango (Mango) - $35</option>
+                            </optgroup>
+                            <optgroup label="Mini Pays Horneados">
+                                <option value="Nube Clásica" data-price="25">Nube Clásica (Clásico) - $25</option>
+                                <option value="Suspiro de Zarzamora" data-price="30">Suspiro de Zarzamora (Zarzamora) - $30</option>
+                                <option value="Beso de Fresa" data-price="30">Beso de Fresa (Fresa) - $30</option>
+                                <option value="Sol de Mango" data-price="30">Sol de Mango (Mango) - $30</option>
+                                <option value="Noche Estrellada" data-price="35">Noche Estrellada (Oreo) - $35</option>
+                            </optgroup>
+                        </select>
+                        <input type="number" id="productQty" value="1" min="1" style="flex: 1;" placeholder="Cant.">
+                        <button type="button" onclick="window.addPostreToOrderUI()" style="padding: 10px; background: var(--misty); border: none; border-radius: 8px; font-weight:bold;">+</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Total Automático ($)</label>
+                    <input type="number" id="ordTotal" required min="0" step="any" readonly style="font-weight: bold; font-size: 1.1rem; color: var(--sage); border-color:transparent;">
+                </div>
+                
+                <div class="form-group">
+                    <label>Fecha de Entrega</label>
+                    <input type="date" id="ordDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Estatus Inicial</label>
+                    <select id="ordStatus">
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Entregado">Entregado</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-submit green">+ Guardar Pedido</button>
+            </form>
+        </div>
+
+        <h3 style="margin-bottom:10px; color:var(--midnight); font-size:1.1rem; padding-left:5px;">Historial de Pedidos</h3>
+        <div class="list-card">
+            <div id="ordersList">
+                <p style="padding:20px; text-align:center; color:#888;">Cargando...</p>
+            </div>
+        </div>
+    </section>
+    <!-- MÉTRICAS (CHART.JS) -->
+    <section id="tab-metrics" class="tab-content">
+        <h2 style="margin-bottom:15px; color:var(--midnight);">Análisis de Ventas</h2>
+        <div class="chart-container">
+            <h3 style="font-size:1rem; margin-bottom:10px; color:#555;">Top Carlotas Vendidas</h3>
+            <canvas id="carlotasChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h3 style="font-size:1rem; margin-bottom:10px; color:#555;">Top Pays Vendidos</h3>
+            <canvas id="paysChart"></canvas>
+        </div>
+    </section>
+
+    <!-- COMUNIDAD (FEEDBACK Y VOTOS) -->
+    <section id="tab-community" class="tab-content">
+        <h2 style="margin-bottom:15px; color:var(--midnight);">Votación Nuevo Sabor</h2>
+        <div class="chart-container">
+            <div id="votesList">Cargando votos...</div>
+        </div>
+        <h2 style="margin-bottom:15px; color:var(--midnight);">Opiniones Recientes</h2>
+        <div id="feedbackList">Cargando comentarios...</div>
+    </section>
+
+    <!-- NAVEGACIÓN INFERIOR -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" onclick="switchTab('dashboard', this)">
+            <span class="nav-icon">📊</span><span>Tablero</span>
+        </button>
+        <button class="nav-btn" onclick="switchTab('expenses', this)">
+            <span class="nav-icon">🛒</span><span>Súper</span>
+        </button>
+        <button class="nav-btn" onclick="switchTab('orders', this)">
+            <span class="nav-icon">📝</span><span>Pedidos</span>
+        </button>
+        <button class="nav-btn" onclick="switchTab('metrics', this)">
+            <span class="nav-icon">📈</span><span>Ventas</span>
+        </button>
+        <button class="nav-btn" onclick="switchTab('community', this)">
+            <span class="nav-icon">💬</span><span>Gente</span>
+        </button>
+    </nav>
+
+
+    <!-- ====== FIREBASE & APP LOGIC ====== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Firebase Config del Usuario
+        const firebaseConfig = {
+            apiKey: "AIzaSyBUwyXlKM5DrKa_UBt65_LBaMyW4OkcQe0",
+            authDomain: "cachitodecielo-843c0.firebaseapp.com",
+            projectId: "cachitodecielo-843c0",
+            storageBucket: "cachitodecielo-843c0.firebasestorage.app",
+            messagingSenderId: "928098493798",
+            appId: "1:928098493798:web:2480fc9f918224a8add4a7",
+            measurementId: "G-HKVRVRX7PY"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Variables Globales
+        let totalIncome = 0;
+        let totalExpenses = 0;
+        let currentOrderItems = [];
+
+        // UI Tabs Logic (Global attach)
+        window.switchTab = function(tabName, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btnElement.classList.add('active');
+        };
+
+        // FECHAS POR DEFECTO
+        document.getElementById('expDate').valueAsDate = new Date();
+        document.getElementById('ordDate').valueAsDate = new Date();
+
+        // -----------------------------------------
+        // LOGICA DE EGRESOS (GASTOS)
+        // -----------------------------------------
+        const expenseForm = document.getElementById('expenseForm');
+        expenseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.innerText = "Guardando..."; btn.disabled = true;
+
+            try {
+                await addDoc(collection(db, "expenses"), {
+                    concept: document.getElementById('expConcept').value,
+                    place: document.getElementById('expPlace').value || "Súper",
+                    amount: parseFloat(document.getElementById('expAmount').value),
+                    date: document.getElementById('expDate').value,
+                    createdAt: new Date()
+                });
+                expenseForm.reset();
+                document.getElementById('expDate').valueAsDate = new Date();
+            } catch (error) {
+                alert("Error al guardar: " + error.message);
+            } finally {
+                btn.innerText = "+ Guardar Gasto"; btn.disabled = false;
+            }
+        });
+
+        // Escuchar Gastos
+        const qExpenses = query(collection(db, "expenses"), orderBy("date", "desc"));
+        onSnapshot(qExpenses, (snapshot) => {
+            const list = document.getElementById('expensesList');
+            list.innerHTML = '';
+            totalExpenses = 0;
+
+            if (snapshot.empty) {
+                list.innerHTML = '<p style="padding:20px; text-align:center; color:#888;">No hay gastos registrados.</p>';
+            }
+
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                totalExpenses += data.amount;
+
+                // Format Date
+                const d = new Date(data.date + 'T12:00:00');
+                const dateStr = d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' });
+
+                list.innerHTML += `
+                    <div class="list-item">
+                        <div class="item-info">
+                            <h4>${data.concept}</h4>
+                            <p>${dateStr} • ${data.place}</p>
+                        </div>
+                        <div style="display:flex; align-items:center;">
+                            <span class="item-amount red">-$${data.amount.toFixed(2)}</span>
+                            <button class="btn-delete" onclick="window.deleteRecord('expenses', '${docSnap.id}')">×</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            updateDashboard();
+            setOnlineStatus();
+        }, (error) => {
+            document.getElementById('syncStatusText').innerText = "Error: Permisos Denegados";
+            document.getElementById('syncStatusText').style.color = "red";
+            console.error("Firebase Error (Egresos):", error);
+        });
+
+
+        // -----------------------------------------
+        // LOGICA DE INGRESOS (PEDIDOS / MINI CART)
+        // -----------------------------------------
+        window.addPostreToOrderUI = function() {
+            const select = document.getElementById('productSelect');
+            const qty = parseInt(document.getElementById('productQty').value);
+            if(!select.value) return;
+            
+            const option = select.options[select.selectedIndex];
+            const price = parseFloat(option.getAttribute('data-price'));
+            
+            currentOrderItems.push({ name: select.value, qty, price });
+            window.renderOrderItemsUI();
+            
+            select.value = '';
+            document.getElementById('productQty').value = 1;
+        };
+
+        window.removePostreFromOrderUI = function(index) {
+            currentOrderItems.splice(index, 1);
+            window.renderOrderItemsUI();
+        };
+
+        window.renderOrderItemsUI = function() {
+            const list = document.getElementById('orderItemsList');
+            let total = 0;
+            list.innerHTML = '';
+            currentOrderItems.forEach((item, index) => {
+                const itemTotal = item.qty * item.price;
+                total += itemTotal;
+                list.innerHTML += `<div style="display: flex; justify-content: space-between; background: #fff; padding: 5px; border-bottom: 1px solid #eee;">
+                    <span>${item.qty}x ${item.name}</span>
+                    <span>$${itemTotal} <span style="color:red; cursor:pointer;" onclick="window.removePostreFromOrderUI(${index})">×</span></span>
+                </div>`;
+            });
+            document.getElementById('ordTotal').value = total;
+        };
+
+        const orderForm = document.getElementById('orderForm');
+        orderForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(currentOrderItems.length === 0) { alert('Añade un postre al pedido.'); return; }
+
+            const btn = e.target.querySelector('button');
+            btn.innerText = "Guardando..."; btn.disabled = true;
+
+            const detailsStr = currentOrderItems.map(i => `${i.qty}x ${i.name}`).join(', ');
+
+            try {
+                await addDoc(collection(db, "orders"), {
+                    client: document.getElementById('ordClient').value,
+                    details: detailsStr,
+                    total: parseFloat(document.getElementById('ordTotal').value),
+                    date: document.getElementById('ordDate').value,
+                    status: document.getElementById('ordStatus').value,
+                    createdAt: new Date()
+                });
+                orderForm.reset();
+                currentOrderItems = [];
+                window.renderOrderItemsUI();
+                document.getElementById('ordDate').valueAsDate = new Date();
+            } catch (error) {
+                alert("Error al guardar: " + error.message);
+            } finally {
+                btn.innerText = "+ Guardar Pedido"; btn.disabled = false;
+            }
+        });
+
+        // Escuchar Pedidos
+        const qOrders = query(collection(db, "orders"), orderBy("date", "desc"));
+        onSnapshot(qOrders, (snapshot) => {
+            const list = document.getElementById('ordersList');
+            list.innerHTML = '';
+            totalIncome = 0;
+            const allOrdersData = [];
+
+            if (snapshot.empty) {
+                list.innerHTML = '<p style="padding:20px; text-align:center; color:#888;">No hay pedidos registrados.</p>';
+            }
+
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                allOrdersData.push(data);
+                
+                if(data.status === 'Entregado'){
+                    totalIncome += data.total;
+                }
+
+                const d = new Date(data.date + 'T12:00:00');
+                const dateStr = d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' });
+
+                list.innerHTML += `
+                    <div class="list-item" style="flex-direction:column; align-items:flex-start;">
+                        <div style="display:flex; justify-content:space-between; width:100%;">
+                            <div class="item-info">
+                                <h4>${data.client} <span style="font-size:0.8rem; font-weight:normal;">(${dateStr})</span></h4>
+                                <p>${data.details}</p>
+                            </div>
+                            <div style="display:flex; align-items:flex-start;">
+                                <span class="item-amount green">+$${data.total.toFixed(2)}</span>
+                                <button class="btn-delete" onclick="window.deleteRecord('orders', '${docSnap.id}')">×</button>
+                            </div>
+                        </div>
+                        <div>
+                            <button class="btn-status status-${data.status}" onclick="window.toggleStatus('${docSnap.id}', '${data.status}')">
+                                ${data.status} ↻
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            updateDashboard();
+            if(window.renderCharts) window.renderCharts(allOrdersData);
+            setOnlineStatus();
+        }, (error) => {
+            document.getElementById('syncStatusText').innerText = "Falta configurar las Reglas en Firebase";
+            document.getElementById('syncStatusText').style.color = "red";
+            console.error("Firebase Error (Pedidos):", error);
+        });
+
+
+        // -----------------------------------------
+        // UTILIDADES GLOBALES (Eliminar y Estatus)
+        // -----------------------------------------
+        window.deleteRecord = async function(collectionName, id) {
+            if(confirm("¿Seguro que quieres borrar este registro de la base de datos?")) {
+                await deleteDoc(doc(db, collectionName, id));
+            }
+        };
+
+        window.toggleStatus = async function(id, currentStatus) {
+            const newStatus = currentStatus === 'Pendiente' ? 'Entregado' : 'Pendiente';
+            await updateDoc(doc(db, "orders", id), {
+                status: newStatus
+            });
+        };
+
+        // -----------------------------------------
+        // DASHBOARD LOGIC
+        // -----------------------------------------
+        function updateDashboard() {
+            document.getElementById('dashIncome').innerText = '$' + totalIncome.toFixed(2);
+            document.getElementById('dashExpenses').innerText = '$' + totalExpenses.toFixed(2);
+            
+            const profit = totalIncome - totalExpenses;
+            const profitEl = document.getElementById('dashProfit');
+            profitEl.innerText = '$' + profit.toFixed(2);
+            
+            if(profit >= 0) {
+                profitEl.className = "dash-value profit-pos";
+            } else {
+                profitEl.className = "dash-value profit-neg";
+            }
+        }
+
+        function setOnlineStatus() {
+            document.getElementById('syncStatusDot').classList.add('online');
+            document.getElementById('syncStatusText').innerText = "Sincronizado";
+        }
+
+        // -----------------------------------------
+        // LOGICA DE MÉTRICAS (CHART.JS)
+        // -----------------------------------------
+        let carlotasChartInstance = null;
+        let paysChartInstance = null;
+
+        window.renderCharts = function(orders) {
+            const countCarlotas = { "Mazapán":0, "Limón":0, "Fresa":0, "Mango":0 };
+            const countPays = { "Clásico":0, "Zarzamora":0, "Fresa":0, "Mango":0, "Oreo":0 };
+
+            orders.forEach(order => {
+                if(!order.details) return;
+                const items = order.details.split(', ');
+                items.forEach(item => {
+                    const match = item.match(/(\d+)x (.*)/);
+                    if(match) {
+                        const qty = parseInt(match[1]);
+                        const name = match[2];
+                        // Clasificación aproximada según nombres oficiales
+                        if(name.includes('Cielo de Mazapán')) countCarlotas["Mazapán"] += qty;
+                        if(name.includes('Brisa de Limón')) countCarlotas["Limón"] += qty;
+                        if(name.includes('Atardecer de Fresa')) countCarlotas["Fresa"] += qty;
+                        if(name.includes('Rayo de Mango')) countCarlotas["Mango"] += qty;
+                        
+                        if(name.includes('Nube Clásica')) countPays["Clásico"] += qty;
+                        if(name.includes('Suspiro de Zarzamora')) countPays["Zarzamora"] += qty;
+                        if(name.includes('Beso de Fresa')) countPays["Fresa"] += qty;
+                        if(name.includes('Sol de Mango')) countPays["Mango"] += qty;
+                        if(name.includes('Noche Estrellada')) countPays["Oreo"] += qty;
+                    }
+                });
+            });
+
+            const carlotasColors = ['#D2B48C', '#A8B58A', '#B46A72', '#FFB347'];
+            const ctxC = document.getElementById('carlotasChart');
+            if(carlotasChartInstance) carlotasChartInstance.destroy();
+            carlotasChartInstance = new Chart(ctxC, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(countCarlotas),
+                    datasets: [{ label: 'Vasos Vendidos', data: Object.values(countCarlotas), backgroundColor: carlotasColors, borderRadius: 5 }]
+                }
+            });
+
+            const paysColors = ['#E8D5B5', '#7A4988', '#B46A72', '#FFB347', '#2D3A47'];
+            const ctxP = document.getElementById('paysChart');
+            if(paysChartInstance) paysChartInstance.destroy();
+            paysChartInstance = new Chart(ctxP, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(countPays),
+                    datasets: [{ label: 'Pays Vendidos', data: Object.values(countPays), backgroundColor: paysColors, borderRadius: 5 }]
+                }
+            });
+        };
+
+        // -----------------------------------------
+        // LOGICA DE COMUNIDAD (VOTOS Y FEEDBACK)
+        // -----------------------------------------
+        const qVotes = query(collection(db, "votes"));
+        onSnapshot(qVotes, (snapshot) => {
+            const counts = {};
+            snapshot.forEach(doc => {
+                const f = doc.data().flavor;
+                counts[f] = (counts[f] || 0) + 1;
+            });
+            let html = '';
+            for(let flavor in counts) {
+                html += `<div style="display:flex; justify-content:space-between; margin-bottom:5px; padding-bottom:5px; border-bottom:1px solid #eee;">
+                            <strong>${flavor}</strong> <span style="background:var(--bg-light); padding:2px 8px; border-radius:10px;">${counts[flavor]} votos</span>
+                         </div>`;
+            }
+            if(!html) html = "<p style='color:#888; text-align:center;'>Aún no hay votos.</p>";
+            document.getElementById('votesList').innerHTML = html;
+        });
+
+        const qFeed = query(collection(db, "feedback"), orderBy("createdAt", "desc"));
+        onSnapshot(qFeed, (snapshot) => {
+            let html = '';
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const stars = '★'.repeat(data.rating) + '☆'.repeat(5-data.rating);
+                html += `<div class="feedback-item">
+                            <div class="feedback-stars">${stars}</div>
+                            <p style="margin-top:5px; color:#555; font-style:italic;">"${data.comment}"</p>
+                         </div>`;
+            });
+            if(!html) html = "<p style='color:#888; text-align:center;'>Aún no hay opiniones.</p>";
+            document.getElementById('feedbackList').innerHTML = html;
+        });
+
+    </script>
+</body>
+</html>
