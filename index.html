@@ -110,7 +110,7 @@
         .kitchen-panel h3 { color: var(--sage); margin-bottom: 10px; font-size: 1.1rem; }
         .kitchen-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem; margin-bottom: 15px; }
         .kitchen-btn { background: var(--sage); color: white; padding: 10px; border-radius: 8px; border: none; width: 100%; font-weight: bold; cursor: pointer; }
-        .cb-kitchen { transform: scale(1.5); margin-right: 15px; accent-color: var(--sage); cursor: pointer; }
+        .cb-kitchen { width: 22px; height: 22px; margin-right: 12px; accent-color: var(--sage); cursor: pointer; flex-shrink: 0; margin-top: 2px; }
 
         /* ANALYTICS & COMMUNITY */
         .chart-container { background: #fff; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
@@ -630,11 +630,11 @@
                 list.innerHTML += `
                     <div class="list-item" style="flex-direction:column; align-items:flex-start;">
                         <div class="order-card-top">
-                            <div class="item-info" style="display:flex; align-items:center;">
+                            <div class="item-info" style="display:flex; align-items:flex-start; width:100%;">
                                 ${checkboxHtml}
-                                <div>
-                                    <h4>${data.client} <span style="font-size:0.8rem; font-weight:normal;">(${dateStr})</span></h4>
-                                    <p>${data.details}</p>
+                                <div style="flex:1; min-width:0;">
+                                    <h4 style="margin-bottom:4px; word-break:break-word;">${data.client} <span style="font-size:0.8rem; font-weight:normal;">(${dateStr})</span></h4>
+                                    <p style="margin:0; word-break:break-word; white-space:normal;">${data.details}</p>
                                 </div>
                             </div>
                             <div class="order-card-actions">
