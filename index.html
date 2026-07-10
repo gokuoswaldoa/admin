@@ -88,6 +88,16 @@
         .btn-action { background: #f0f0f0; border: none; border-radius: 6px; padding: 8px; cursor: pointer; font-size: 1rem; }
         .btn-action.delete { color: #ff4d4f; }
         .btn-action.edit { color: #1890ff; }
+        
+        .order-card-top { display: flex; justify-content: space-between; width: 100%; gap: 10px; }
+        .order-card-actions { display: flex; align-items: flex-start; }
+        
+        @media (max-width: 600px) {
+            .order-card-top { flex-direction: column; align-items: flex-start; }
+            .order-card-actions { margin-top: 12px; width: 100%; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 10px; border-radius: 8px; }
+            .action-btns { margin-left: 0; }
+            .item-info p { max-width: 100%; word-wrap: break-word; white-space: normal; }
+        }
 
         .btn-status { border: none; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top:5px; cursor:pointer;}
         .status-Pendiente { background: #fff3cd; color: #856404; }
@@ -226,7 +236,6 @@
                             </optgroup>
                             <optgroup label="Mini Pays Horneados">
                                 <option value="Nube Clásica" data-price="25">Nube Clásica (Clásico) - $25</option>
-                                <option value="Suspiro de Zarzamora" data-price="30">Suspiro de Zarzamora (Zarzamora) - $30</option>
                                 <option value="Beso de Fresa" data-price="30">Beso de Fresa (Fresa) - $30</option>
                                 <option value="Sol de Mango" data-price="30">Sol de Mango (Mango) - $30</option>
                                 <option value="Noche Estrellada" data-price="35">Noche Estrellada (Oreo) - $35</option>
@@ -620,7 +629,7 @@
 
                 list.innerHTML += `
                     <div class="list-item" style="flex-direction:column; align-items:flex-start;">
-                        <div style="display:flex; justify-content:space-between; width:100%;">
+                        <div class="order-card-top">
                             <div class="item-info" style="display:flex; align-items:center;">
                                 ${checkboxHtml}
                                 <div>
@@ -628,7 +637,7 @@
                                     <p>${data.details}</p>
                                 </div>
                             </div>
-                            <div style="display:flex; align-items:flex-start;">
+                            <div class="order-card-actions">
                                 <span class="item-amount green">+$${data.total.toFixed(2)}</span>
                                 <div class="action-btns">
                                     <button class="btn-action edit" onclick="window.editOrder('${data.id}')">✏️</button>
@@ -848,4 +857,3 @@
     </script>
 </body>
 </html>
-
